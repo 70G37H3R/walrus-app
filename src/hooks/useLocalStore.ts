@@ -9,8 +9,8 @@ export async function getSetting() {
     const defaultSetting: SettingOnStore = {
         username: "walrus",
         password: "password",
-        aggregator: "https://aggregator-devnet.walrus.space",
-        publisher: "https://publisher-devnet.walrus.space",
+        aggregator: "https://aggregator.walrus-testnet.walrus.space",
+        publisher: "https://publisher.walrus-testnet.walrus.space",
         salt: "",
         walrusHash: "",
         walrusSalt: "",
