@@ -94,7 +94,7 @@ export default function UploadFile(
         resultbytes.set(pbkdf2salt, 8);
         resultbytes.set(cipherbytes, 16);
 
-        const publisherUrl = `${setting.publisher}/v1/store?epochs=1`;
+        const publisherUrl = `${setting.publisher}/v1/blobs?epochs=1`;
         const config = {
             headers: {
                 'content-type': 'multipart/form-data',
