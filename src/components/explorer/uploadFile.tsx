@@ -38,7 +38,7 @@ export default function UploadFile(
         const setting = await getSetting();
 
         setUploadProgress(0);
-        setIsWarning(setting.publisher === "https://publisher-devnet.walrus.space");
+        setIsWarning(setting.publisher === "https://publisher.walrus-testnet.walrus.space");
         setStep(2);
 
         const blob = await readfile(file).catch(function (err) {
