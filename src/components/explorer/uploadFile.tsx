@@ -97,7 +97,7 @@ export default function UploadFile(
         const publisherUrl = `${setting.publisher}/v1/blobs?epochs=1`;
         const config = {
             headers: {
-                'content-type': 'multipart/form-data',
+                'content-type': 'application/octet-stream',
             },
             onUploadProgress: function (progressEvent) {
                 const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
