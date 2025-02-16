@@ -13,7 +13,6 @@ import Home from "@/components/home/home.tsx";
 import Folder, {loader as folderLoader, action as folderAction} from "@/components/folder/folder.tsx";
 import Media, {loader as mediaLoader} from "@/components/media/media.tsx";
 import Setting, {loader as settingLoader} from "@/components/setting/setting.tsx";
-import Subscribe from "@/components/subscribe/subscribe.tsx";
 
 import '@radix-ui/themes/styles.css';
 import "@/styles/globals.css";
@@ -51,11 +50,7 @@ const router = createBrowserRouter([
                     path: "setting",
                     Component: Setting,
                     loader: settingLoader,
-                },
-                {
-                    path: "/subscribe",
-                    Component: Subscribe,
-                },
+                }
             ],
         },
         {

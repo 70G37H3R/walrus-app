@@ -46,15 +46,3 @@ Please note that because the Walrus protocol currently uses (Testnet) Sui, the d
 
 ## Image preview
 ![preview.png](doc%2Fpreview.png)
-
-[Walrus Disk Web](https://3le187byarbjhebojrko3ifez30klgqqol680rxspl5l5orchr.walrus.site)
-
-[Walrus docs](https://docs.walrus.site/)
-
-[Walrus Sites](https://walrus.site/)
-
-[Sui docs](https://docs.sui.io/)
-
-Email: bc443995@gmail.com
-
-Donate to Sui Wallet Address: 0x6f25929f026483a440f5f16e03661087eb41604528050b989f48624b049c4b78

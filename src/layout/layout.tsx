@@ -48,12 +48,6 @@ export default function Layout() {
                             </ul>
                         </nav>
                     </Box>
-                    <nav>
-                        <ul>
-                            <li><Link to="/subscribe">Get Walrus Disk+</Link></li>
-                        </ul>
-
-                    </nav>
                 </Box>
 
                 <Box className="detail">

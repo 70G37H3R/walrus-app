@@ -65,36 +65,9 @@ export default function Home() {
                                 <Text>
                                     <Text weight="bold">Publisher:</Text> https://publisher-devnet.walrus.space
                                 </Text>
-                                <Text>
-                                    Walrus publisher is currently limiting requests to <Strong>10 MiB</Strong>. If
-                                    you want to upload larger
-                                    files, you need to run your own publisher.
-                                </Text>
-
-                                <Text color="red">
-                                    Please note that because the Walrus protocol currently uses (Testnet) Sui, the
-                                    data may
-                                    be updated by the publisher at any time.
-                                    If you want better service, you can subscribe to the Walrus Disk+ version to
-                                    get
-                                    continuous update service.
-                                </Text>
-
                             </Flex>
                         </Blockquote>
                     </Card>
-                    <Link to="https://docs.walrus.site/" target="_blank">Walrus docs</Link>
-                    <Link to="https://walrus.site/" target="_blank">Walrus Sites</Link>
-                    <Link to="https://docs.sui.io/" target="_blank">Sui docs</Link>
-                    <Text>
-                        Email: bc443995@gmail.com
-                    </Text>
-                    <Text>
-                        Donate to Sui Wallet Address:
-                        0x6f25929f026483a440f5f16e03661087eb41604528050b989f48624b049c4b78
-                    </Text>
-                    <Box className="email">
-                    </Box>
                 </Flex>
             </Box>
 

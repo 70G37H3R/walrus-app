@@ -92,25 +92,9 @@ export default function Setting() {
                             <Text>
                                 <Text weight="bold">Publisher:</Text> https://publisher-devnet.walrus.space
                             </Text>
-                            <Text>
-                                Walrus publisher is currently limiting requests to <Strong>10 MiB</Strong>. If you want
-                                to upload larger
-                                files, you need to run your own publisher.
-                            </Text>
-
-                            <Text color="red">
-                                Please note that because the Walrus protocol currently uses (Testnet) Sui, the data may
-                                be updated by the publisher at any time.
-                                If you want better service, you can subscribe to the Walrus Disk+ version to get
-                                continuous update service.
-                            </Text>
-
-                            <Flex justify="end"><Link to="/subscribe"><Button>subscribe</Button></Link></Flex>
                         </Flex>
                     </Blockquote>
                 </Card>
-
-
             </Flex>
         </>
     )
