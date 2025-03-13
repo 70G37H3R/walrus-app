@@ -45,4 +45,3 @@ export const apiAuthProvider: AuthProvider = {
         return await localforage.getItem(KEY_USER)
     },
 };
-

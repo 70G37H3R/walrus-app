@@ -1,5 +1,0 @@
----
-num_coins: 5
-amounts: [1000000000]  # 1 SUI = 1_000_000_000 MIST
-url: "https://fullnode.testnet.sui.io:443"
-mint_address: "0x7c498ba82a1a17fd18bd600adaea796526098383d343e02c4aaff1bbe4604769"
