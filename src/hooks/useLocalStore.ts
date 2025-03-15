@@ -6,11 +6,14 @@ const KEY_SETTING = "setting";
 
 // ------ Setting API ------
 export async function getSetting(): Promise<SettingOnStore> {
-    let setting = await localforage.getItem<SettingOnStore>(KEY_SETTING);
-
-    if (setting) {
-        console.log("🔍 Retrieved existing settings:", setting);
-        return setting;
+    try {
+        let setting = await localforage.getItem<SettingOnStore>(KEY_SETTING);
+        if (setting) {
+            console.log("🔍 Retrieved existing settings:", setting);
+            return setting;
+        }
+    } catch (error) {
+        console.error("❌ Error retrieving settings:", error);
     }
 
     console.warn("⚠️ No settings found. Initializing default settings...");
@@ -25,12 +28,15 @@ export async function getSetting(): Promise<SettingOnStore> {
         walrusSalt: Math.random().toString(36).substring(2, 10),
     };
 
-    // Hash the default password before storing
     defaultSetting.password = `${defaultSetting.salt}:${CryptoJS.SHA1(defaultSetting.password + defaultSetting.salt).toString()}`;
 
-    await localforage.setItem(KEY_SETTING, defaultSetting);
+    try {
+        await localforage.setItem(KEY_SETTING, defaultSetting);
+        console.log("✅ Default settings initialized:", defaultSetting);
+    } catch (error) {
+        console.error("❌ Error saving default settings:", error);
+    }
 
-    console.log("✅ Default settings initialized:", defaultSetting);
     return defaultSetting;
 }
 

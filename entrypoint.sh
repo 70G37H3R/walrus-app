@@ -57,32 +57,38 @@ fi
 
 # Ensure Wallet Configuration Exists
 WALLET_DIR="/root/wallets"
-WALLET_PATH="$WALLET_DIR/wallet.json"
 if [ ! -d "$WALLET_DIR" ]; then
     echo "📂 Creating wallet directory..."
     mkdir -p "$WALLET_DIR"
 fi
 
-if [ ! -f "$WALLET_PATH" ]; then
-    echo "⚠️ Wallet config not found, checking existing Sui wallet..."
+# Define Sui config path
+SUI_CONFIG_DIR="$HOME/.sui/sui_config"
+SUI_CONFIG_FILE="$SUI_CONFIG_DIR/client.yaml"
 
-    # Check if Sui wallet directory exists
-    if [ -d "~/.sui/sui_config" ]; then
-        echo "✅ Found existing Sui wallet. Skipping wallet generation."
+# Ensure Sui client is configured
+if [ ! -f "$SUI_CONFIG_FILE" ]; then
+    echo "⚠️ No existing Sui config found. Creating a new one..."
+    
+    # Create the config directory if it doesn’t exist
+    mkdir -p "$SUI_CONFIG_DIR"
+
+    # Generate a new Sui wallet (automated)
+    sui client new-address ed25519 --json > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        echo "✅ Sui wallet initialized successfully."
     else
-        echo "⚠️ No existing wallet found. Generating a new one..."
-        walrus generate-sui-wallet --path "$WALLET_DIR"
-
-        if [ $? -ne 0 ]; then
-            echo "❌ Failed to generate wallet!"
-            exit 1
-        fi
+        echo "❌ Failed to initialize Sui wallet!"
+        exit 1
     fi
+else
+    echo "✅ Found existing Sui wallet. Skipping wallet generation."
 fi
 
 # Start services with dynamic ports
-echo "🚀 Starting Sui Faucet on port $SUI_PORT..."
-sui faucet start --port "$SUI_PORT" &
+echo "🚀 Requesting Sui faucet funds..."
+sui client faucet
 
 echo "🚀 Starting Walrus Publisher on port $WALRUS_PORT..."
 walrus publisher --sub-wallets-dir "$WALLET_DIR" --metrics-address "0.0.0.0:$WALRUS_METRICS_PORT" &

@@ -1,92 +1,62 @@
-import {Blockquote, Box, Button, Card, Dialog, Flex, Progress, Spinner, Strong, Text} from "@radix-ui/themes";
-import {Form} from "react-router-dom";
-import React, {useState} from "react";
-import {getSetting} from "@/hooks/useLocalStore.ts";
-import {BlobOnWalrus, NewBlobOnWalrus} from "@/types/BlobOnWalrus.ts";
-import {FileOnStore} from "@/types/FileOnStore.ts";
-import {createFile} from "@/hooks/useFileStore.ts";
+import { Blockquote, Box, Button, Card, Dialog, Flex, Progress, Spinner, Strong, Text } from "@radix-ui/themes";
+import { Form } from "react-router-dom";
+import React, { useState } from "react";
+import { getSetting } from "@/hooks/useLocalStore.ts";
+import { BlobOnWalrus, NewBlobOnWalrus } from "@/types/BlobOnWalrus.ts";
+import { FileOnStore } from "@/types/FileOnStore.ts";
+import { createFile } from "@/hooks/useFileStore.ts";
 import * as Toast from '@radix-ui/react-toast';
 import axios from 'axios';
+import { motion } from "framer-motion";
 
 import "@/styles/toast.css";
 
-export default function UploadFile(
-    {
-        root,
-        reFetchDir,
-    }) {
+export default function UploadFile({ root, reFetchDir }) {
     const [file, setFile] = useState();
     const [step, setStep] = useState(0);
     const [uploadProgress, setUploadProgress] = useState(0);
-    const [openToast, setOpenToast] = React.useState(false);
-    const [isError, setIsError] = React.useState(false);
-    const [isWarning, setIsWarning] = React.useState(false);
-    const [message, setMessage] = React.useState("");
+    const [openToast, setOpenToast] = useState(false);
+    const [isError, setIsError] = useState(false);
+    const [isWarning, setIsWarning] = useState(false);
+    const [message, setMessage] = useState("");
 
     const readfile = (file) => {
         return new Promise((resolve, reject) => {
             const fr = new FileReader();
-            fr.onload = () => {
-                resolve(fr.result)
-            };
+            fr.onload = () => resolve(fr.result);
             fr.readAsArrayBuffer(file);
         });
-    }
+    };
 
     const handleSubmit = async (event) => {
-        event.preventDefault()
+        event.preventDefault();
         const setting = await getSetting();
 
         setUploadProgress(0);
         setIsWarning(setting.publisher === "https://publisher.walrus-testnet.walrus.space");
         setStep(2);
 
-        const blob = await readfile(file).catch(function (err) {
-            console.error(err);
-        });
-        // return
-
+        const blob = await readfile(file).catch(console.error);
         const plaintextbytes = new Uint8Array(blob);
 
         const pbkdf2iterations = 10000;
         const passphrasebytes = new TextEncoder("utf-8").encode(setting.walrusHash);
         const pbkdf2salt = new TextEncoder("utf-8").encode(setting.walrusSalt);
 
-        const passphrasekey = await window.crypto.subtle.importKey('raw', passphrasebytes, {name: 'PBKDF2'}, false, ['deriveBits'])
-            .catch(function (err) {
-                console.error(err);
-            });
-
+        const passphrasekey = await window.crypto.subtle.importKey('raw', passphrasebytes, { name: 'PBKDF2' }, false, ['deriveBits']);
         let pbkdf2bytes = await window.crypto.subtle.deriveBits({
-            "name": 'PBKDF2',
-            "salt": pbkdf2salt,
-            "iterations": pbkdf2iterations,
-            "hash": 'SHA-256'
-        }, passphrasekey as CryptoKey, 384)
-            .catch(function (err) {
-                console.error(err);
-            });
-        pbkdf2bytes = new Uint8Array(pbkdf2bytes);
+            name: 'PBKDF2',
+            salt: pbkdf2salt,
+            iterations: pbkdf2iterations,
+            hash: 'SHA-256'
+        }, passphrasekey, 384);
 
+        pbkdf2bytes = new Uint8Array(pbkdf2bytes);
         let keybytes = pbkdf2bytes.slice(0, 32);
         let ivbytes = pbkdf2bytes.slice(32);
 
-        const key = await window.crypto.subtle.importKey('raw', keybytes, {
-            name: 'AES-CBC',
-            length: 256
-        }, false, ['encrypt'])
-            .catch(function (err) {
-                console.error(err);
-            });
-
-        var cipherbytes = await window.crypto.subtle.encrypt({
-            name: "AES-CBC",
-            iv: ivbytes
-        }, key as CryptoKey, plaintextbytes)
-            .catch(function (err) {
-                console.error(err);
-            });
-
+        const key = await window.crypto.subtle.importKey('raw', keybytes, { name: 'AES-CBC', length: 256 }, false, ['encrypt']);
+        let cipherbytes = await window.crypto.subtle.encrypt({ name: "AES-CBC", iv: ivbytes }, key, plaintextbytes);
         cipherbytes = new Uint8Array(cipherbytes);
 
         const resultbytes = new Uint8Array(cipherbytes.length + 16);
@@ -96,34 +66,26 @@ export default function UploadFile(
 
         const publisherUrl = `${setting.publisher}/v1/blobs?epochs=1`;
         const config = {
-            headers: {
-                'content-type': 'application/octet-stream',
-            },
-            onUploadProgress: function (progressEvent) {
+            headers: { 'content-type': 'application/octet-stream' },
+            onUploadProgress: (progressEvent) => {
                 const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                 setUploadProgress(percentCompleted);
             }
         };
 
-        // axios.put(publisherUrl, plaintextbytes, config).then(response => {
         axios.put(publisherUrl, resultbytes, config).then(response => {
-            console.log('store', response)
             setUploadProgress(0);
-            let blobId: string;
+            let blobId = response.data.alreadyCertified
+                ? response.data.alreadyCertified.blobId
+                : response.data.newlyCreated?.blobObject.blobId;
 
-            if (response.data.alreadyCertified) {
-                blobId = (response.data.alreadyCertified as BlobOnWalrus).blobId
-                setMessage("This file has already been uploaded")
-            } else if (response.data.newlyCreated) {
-                blobId = (response.data.newlyCreated as NewBlobOnWalrus).blobObject.blobId
-                setMessage("Walrus file created successfully")
-            } else {
-                setUploadProgress(0);
-                setStep(0);
+            if (!blobId) {
                 setMessage("Walrus's response is error.");
                 setIsError(true);
                 return;
             }
+
+            setMessage(response.data.alreadyCertified ? "This file has already been uploaded" : "Walrus file created successfully");
 
             const fileInfo: FileOnStore = {
                 id: "",
@@ -136,70 +98,37 @@ export default function UploadFile(
                 createAt: 0,
                 password: setting.walrusHash,
                 salt: setting.walrusSalt,
-            }
+            };
 
-            // console.log('new file', fileInfo);
             createFile(fileInfo).then(() => {
-                reFetchDir()
+                reFetchDir();
                 setStep(0);
-                setOpenToast(true)
-            })
+                setOpenToast(true);
+            });
         }).catch(error => {
-            console.log('store error', error)
             setUploadProgress(0);
             setStep(0);
             setMessage('Please check your network configuration and make sure the Walrus service address is correct.');
-            setIsError(true)
-        })
-
-    }
+            setIsError(true);
+        });
+    };
 
     return (
         <>
             <Dialog.Root>
                 <Dialog.Trigger>
-                    <Button onClick={
-                        async () => {
-                        }
-                    }>Upload File</Button>
+                    <Button>Upload File</Button>
                 </Dialog.Trigger>
-
                 <Dialog.Content maxWidth="650px">
-                    <Dialog.Title>Step 1: ENCRYPT file</Dialog.Title>
-                    <Dialog.Description size="2" mb="4">
-                    </Dialog.Description>
-
+                    <Dialog.Title style={{ color: 'green' }}>Step 1: ENCRYPT file</Dialog.Title>
                     <Form onSubmit={handleSubmit}>
                         <Flex direction="column" gap="3">
-                            <Text>
-                                Walrus Disk uses javascript running within your web browser to encrypt and decrypt
-                                files client-side, in-browser. This App makes no network connections during
-                                this
-                                process, to ensure that your keys never leave the web browser during
-                                the
-                                process.
-                            </Text>
-                            <Text>
-                                All client-side cryptography is implemented using the Web Crypto API. Files
-                                are encrypted using AES-CBC 256-bit symmetric encryption. The encryption key is
-                                derived from the password and a random salt using PBKDF2 derivation with 10000
-                                iterations of SHA256 hashing.
-
-                            </Text>
-                            <input type="file" onChange={(e) => {
-                                setFile(e.target.files[0])
-                            }}/>
+                            <Text>Files are encrypted using AES-CBC 256-bit encryption before uploading.</Text>
+                            <input type="file" onChange={(e) => setFile(e.target.files[0])} />
                         </Flex>
-
                         <Flex gap="3" mt="4" justify="end">
-                            <Dialog.Close>
-                                <Button variant="soft" color="gray">
-                                    Cancel
-                                </Button>
-                            </Dialog.Close>
-                            <Dialog.Close>
-                                <Button type="submit">ENCRYPT</Button>
-                            </Dialog.Close>
+                            <Dialog.Close><Button variant="soft" color="gray">Cancel</Button></Dialog.Close>
+                            <Dialog.Close><Button type="submit">ENCRYPT</Button></Dialog.Close>
                         </Flex>
                     </Form>
                 </Dialog.Content>
@@ -207,74 +136,52 @@ export default function UploadFile(
 
             <Dialog.Root open={step == 2}>
                 <Dialog.Content maxWidth="550px">
-                    <Dialog.Title>Step 2: Upload encrypted files to Walrus Disk</Dialog.Title>
-                    <Dialog.Description size="2" mb="4">
-                    </Dialog.Description>
-
+                    <Dialog.Title style={{ color: 'green' }}>Step 2: Upload encrypted files to Walrus Decentralized Storage</Dialog.Title>
                     <Flex direction="column" gap="3">
-                        {isWarning ?
+                        {isWarning && (
                             <Card>
-                                <Flex direction="column" gap="3">
-                                    <Text>
-                                        The Walrus system provides an interface that can be used for public testing. For
-                                        your
-                                        convenience, walrus provide these at the following hosts:
-                                    </Text>
-                                    <Text>
-                                        <Text weight="bold">Aggregator:</Text> https://aggregator-devnet.walrus.space
-                                    </Text>
-                                    <Text>
-                                        <Text weight="bold">Publisher:</Text> https://publisher-devnet.walrus.space
-                                    </Text>
-                                    <Text color="red">
-                                        Walrus publisher is currently limiting requests to <Strong>10 MiB</Strong>. If
-                                        you want
-                                        to upload larger
-                                        files, you need to run your own publisher.
-                                    </Text>
-                                </Flex>
-                            </Card> : null}
-                        {uploadProgress < 100 ?
-                            <Progress value={uploadProgress} size="3"></Progress> :
-                            <Button>
-                                <Spinner loading></Spinner> Waiting Walrus response.
-                            </Button>}
+                                <Text>Walrus publisher limits requests to <Strong>10 MiB</Strong>. Run your own publisher for larger files.</Text>
+                            </Card>
+                        )}
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${uploadProgress}%` }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Progress value={uploadProgress} size="3" variant="soft" color="green" />
+                        </motion.div>
+                        {uploadProgress >= 100 && (
+                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
+                                <Spinner loading />
+                            </motion.div>
+                        )}
+                        <Text>Waiting for Walrus response...</Text>
                     </Flex>
-
                 </Dialog.Content>
             </Dialog.Root>
 
-            <Dialog.Root open={isError}>
-                <Dialog.Content maxWidth="450px">
-                    <Dialog.Title>Network Error</Dialog.Title>
-                    <Dialog.Description size="2" mb="4">
-                    </Dialog.Description>
-
-                    <Flex direction="column" gap="3">
-                        <Text>
-                            {message}
-                        </Text>
-
-                        <Flex gap="3" mt="4" justify="end">
-                            <Dialog.Close>
-                                <Button onClick={() => {
-                                    setIsError(false)
-                                }}>Close</Button>
-                            </Dialog.Close>
-                        </Flex>
-
-                    </Flex>
-
-                </Dialog.Content>
-            </Dialog.Root>
+            {isError && (
+                <motion.div animate={{ x: [0, -10, 10, -10, 10, 0] }} transition={{ duration: 0.5 }}>
+                    <Dialog.Root open={isError}>
+                        <Dialog.Content maxWidth="450px">
+                            <Dialog.Title>Network Error</Dialog.Title>
+                            <Text>{message}</Text>
+                            <Flex gap="3" mt="4" justify="end">
+                                <Dialog.Close><Button onClick={() => setIsError(false)}>Close</Button></Dialog.Close>
+                            </Flex>
+                        </Dialog.Content>
+                    </Dialog.Root>
+                </motion.div>
+            )}
 
             <Toast.Provider swipeDirection="right">
-                <Toast.Root className="ToastRoot" open={openToast} onOpenChange={setOpenToast}>
-                    <Toast.Title className="ToastTitle">{message}</Toast.Title>
-                </Toast.Root>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
+                    <Toast.Root className="ToastRoot" open={openToast} onOpenChange={setOpenToast}>
+                        <Toast.Title className="ToastTitle">{message}</Toast.Title>
+                    </Toast.Root>
+                </motion.div>
                 <Toast.Viewport className="ToastViewport"/>
             </Toast.Provider>
-
         </>
-    )
+    );
 }

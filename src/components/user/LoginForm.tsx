@@ -7,7 +7,7 @@ export async function action({ request }) {
     const formData = await request.formData();
     const { username, password } = Object.fromEntries(formData);
     const errors = {
-        message: "Wrong authentication information, the default password is [password]"
+        message: "🚨 Wrong authentication information! Default password is [password]"
     };
 
     if (await apiAuthProvider.signin(username, password)) {
@@ -28,26 +28,70 @@ export default function LoginForm() {
     }, [errors]);
 
     return (
-        <RouterForm method="post">
-            <Box className="login-container">
-                <Card className="login-form" style={{ background: "var(--gray-a1)", maxWidth: 400 }}>
-                    <Flex direction="column" gap="3">
-                        <Text as="div" weight="bold" size="3" mb="1" align={'center'}>
-                            Walrus Disk Sign In
-                        </Text>
-                        <label>
-                            <Text as="div" size="2" mb="1" weight="bold">Name</Text>
-                            <TextField.Root name="username" defaultValue="" placeholder="Enter your name" />
-                        </label>
-                        <label>
-                            <Text as="div" size="2" mb="1" weight="bold">Password</Text>
-                            <TextField.Root name="password" type="password" defaultValue="" placeholder="Enter your password" />
-                        </label>
-                        <Button>Login</Button>
-                        <Text size="1" mb="1" color="red">{message}</Text>
+        <Box
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                background: "linear-gradient(to right, #e3ffe7, #d9e7ff)", // Soft green-blue gradient
+            }}
+        >
+            <RouterForm method="post">
+                <Card
+                    style={{
+                        background: "white",
+                        padding: "30px",
+                        borderRadius: "12px",
+                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                        maxWidth: "380px",
+                    }}
+                >
+                    <Text
+                        weight="bold"
+                        size="5"
+                        color="green"
+                        align="center"
+                        style={{ textShadow: "1px 1px 4px rgba(0, 128, 0, 0.2)" }}
+                    >
+                        🔐 Walrus Decentralized Storage
+                    </Text>
+
+                    <Flex direction="column" gap="4" mt="4">
+                        <Flex direction="column" gap="2">
+                            <Text size="3" weight="bold">Username</Text>
+                            <TextField.Root name="username" placeholder="Enter your username" />
+                        </Flex>
+
+                        <Flex direction="column" gap="2">
+                            <Text size="3" weight="bold">Password</Text>
+                            <TextField.Root name="password" type="password" placeholder="Enter your password" />
+                        </Flex>
+
+                        <Button
+                            style={{
+                                background: "green",
+                                color: "white",
+                                fontWeight: "bold",
+                                padding: "10px",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                transition: "0.3s",
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = "#0a5a0a"}
+                            onMouseOut={(e) => e.currentTarget.style.background = "green"}
+                        >
+                            Login
+                        </Button>
+
+                        {message && (
+                            <Text size="2" color="red" style={{ marginTop: "10px", fontWeight: "bold" }}>
+                                {message}
+                            </Text>
+                        )}
                     </Flex>
                 </Card>
-            </Box>
-        </RouterForm>
+            </RouterForm>
+        </Box>
     );
 }

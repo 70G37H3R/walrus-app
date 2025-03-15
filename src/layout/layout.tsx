@@ -1,12 +1,10 @@
-import {Link, Outlet, redirect, useLoaderData, useRouteLoaderData} from "react-router-dom";
-import {Box, Button, Container, Flex, Text, TextField} from "@radix-ui/themes";
-import {HomeIcon, MagnifyingGlassIcon} from "@radix-ui/react-icons";
-import {apiAuthProvider} from "@/hooks/useAuthStatus.ts";
-import {getSetting} from "@/hooks/useLocalStore.ts";
+import { Link, Outlet, redirect, useLoaderData } from "react-router-dom";
+import { Box, Button, Flex, Text } from "@radix-ui/themes";
+import { apiAuthProvider } from "@/hooks/useAuthStatus.ts";
+import { getSetting } from "@/hooks/useLocalStore.ts";
 
 export async function loader() {
     const setting = await getSetting();
-    // console.log('setting', setting);
     const user = await apiAuthProvider.getUser();
     if (!user) {
         return redirect('/login');
@@ -14,48 +12,112 @@ export async function loader() {
 
     return {
         username: user.username
-    }
+    };
 }
 
 export default function Layout() {
-    const {username} = useLoaderData();
-    // console.log('username', username);
+    const { username } = useLoaderData();
 
     return (
-        <>
-            <Flex>
-                <Box className="sidebar">
-                    <h1><Link to="/" style={{textDecoration: 'none'}}>Walrus Disk</Link></h1>
-                    <Flex>
-                        <Text size="5">Walrus Disk</Text>
-                    </Flex>
-                    <Box height="240px">
-                        <nav>
-                            <ul>
-                                <li><Link to="/">Home</Link></li>
-                                <li><Link to="/folder/0">All files</Link></li>
-                                <li><Link to="/media/image">Picture</Link></li>
-                                <li><Link to="/media/video">Video</Link></li>
-                                <li><Link to="/media/application">Document</Link></li>
-                            </ul>
-                        </nav>
-                    </Box>
-                    <Box height="120px">
-                        <nav>
-                            <ul>
-                                <li><Link to="/setting">Setting</Link></li>
-                                <li><Link to="/logout">Sign out</Link></li>
-                            </ul>
-                        </nav>
-                    </Box>
+        <Flex
+            style={{
+                height: "100vh",
+                background: "#f4f4f4", // Soft neutral background
+            }}
+        >
+            {/* Sidebar */}
+            <Box
+                style={{
+                    width: "280px",
+                    background: "white",
+                    padding: "20px",
+                    boxShadow: "2px 0px 10px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    borderRadius: "0 12px 12px 0", // Rounded right edges
+                }}
+            >
+                <Box>
+                    <Text as="h1" size="5" weight="bold" color="green" style={{ marginBottom: "20px" }}>
+                        <Link to="/" style={{ textDecoration: "none", color: "green" }}>Walrus Decentralized Storage</Link>
+                    </Text>
+
+                    <nav style={{ marginTop: "10px" }}>
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                            {[
+                                { path: "/", label: "🏠 Home" },
+                                { path: "/folder/0", label: "📂 All Files" },
+                                { path: "/media/image", label: "🖼️ Pictures" },
+                                { path: "/media/video", label: "📹 Videos" },
+                                { path: "/media/application", label: "📄 Documents" },
+                            ].map(({ path, label }) => (
+                                <li key={path} style={{ margin: "8px 0" }}>
+                                    <Link
+                                        to={path}
+                                        style={{
+                                            textDecoration: "none",
+                                            color: "black",
+                                            fontWeight: "500",
+                                            padding: "8px 12px",
+                                            display: "block",
+                                            borderRadius: "6px",
+                                            transition: "0.3s",
+                                        }}
+                                        onMouseOver={(e) => (e.currentTarget.style.background = "#e3ffe7")}
+                                        onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
+                                    >
+                                        {label}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
                 </Box>
 
-                <Box className="detail">
-                    <Outlet/>
+                {/* Bottom Links */}
+                <Box>
+                    <Text size="3" weight="bold" color="gray">Settings</Text>
+                    <nav>
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                            {[
+                                { path: "/setting", label: "⚙️ Setting" },
+                                { path: "/logout", label: "🚪 Sign out" },
+                            ].map(({ path, label }) => (
+                                <li key={path} style={{ margin: "8px 0" }}>
+                                    <Link
+                                        to={path}
+                                        style={{
+                                            textDecoration: "none",
+                                            color: "black",
+                                            fontWeight: "500",
+                                            padding: "8px 12px",
+                                            display: "block",
+                                            borderRadius: "6px",
+                                            transition: "0.3s",
+                                        }}
+                                        onMouseOver={(e) => (e.currentTarget.style.background = "#ffe3e3")}
+                                        onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
+                                    >
+                                        {label}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
                 </Box>
+            </Box>
 
-
-            </Flex>
-        </>
+            {/* Main Content Area */}
+            <Box
+                style={{
+                    flex: 1,
+                    padding: "20px",
+                    overflowY: "auto",
+                }}
+            >
+                <Outlet />
+            </Box>
+        </Flex>
     );
 }

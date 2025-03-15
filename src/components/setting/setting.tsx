@@ -30,84 +30,95 @@ export default function Setting() {
     const [showDialog, setShowDialog] = useState(false);
 
     return (
-        <Flex gap="3" px="4" py="4" direction="column" width="650px">
-            <Heading>Setting</Heading>
+        <Flex
+            style={{
+                height: "100vh",
+                justifyContent: "center",
+                alignItems: "center",
+                background: "#f0fdf4",
+            }}
+        >
+            <Card
+                style={{
+                    padding: "30px",
+                    borderRadius: "16px",
+                    boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.15)",
+                    maxWidth: "500px",
+                    width: "100%",
+                    background: "white",
+                }}
+            >
+                <Heading size="5" color="green" align="center" style={{ marginBottom: "20px", textShadow: "1px 1px 3px rgba(0, 128, 0, 0.2)" }}>
+                    ⚙️ Settings
+                </Heading>
 
-            <Form method="post" onSubmit={() => setShowDialog(true)}>
-                <Card>
-                    <Flex direction="column" gap="5" px="3" py="5">
-                        <Flex align="center" gap="3">
-                            <Text size="2" weight="bold" style={{ width: 100 }}>Username</Text>
-                            <TextField.Root
-                                name="username"
-                                defaultValue={setting.username}
-                                style={{ width: 600 }}
-                            />
-                        </Flex>
+                <Form method="post" onSubmit={() => setShowDialog(true)}>
+                    <Flex direction="column" gap="4">
+                        {["Username", "Password", "Aggregator", "Publisher"].map((field, index) => (
+                            <label key={index}>
+                                <Text weight="bold" size="3">{field}</Text>
+                                <TextField.Root
+                                    name={field.toLowerCase()}
+                                    type={field === "Password" ? "password" : "text"}
+                                    defaultValue={field === "Password" ? "" : setting[field.toLowerCase()]}
+                                    placeholder={`Enter ${field.toLowerCase()}`}
+                                    style={{
+                                        borderRadius: "8px",
+                                        padding: "8px",
+                                        border: "1px solid #81c784", // Light green border
+                                    }}
+                                />
+                            </label>
+                        ))}
 
-                        <Flex align="center" gap="3">
-                            <Text size="2" weight="bold" style={{ width: 100 }}>Password</Text>
-                            <TextField.Root
-                                name="password"
-                                type="password"
-                                defaultValue=""
-                                placeholder="Enter new password"
-                                style={{ width: 600 }}
-                            />
-                        </Flex>
-
-                        <Flex align="center" gap="3">
-                            <Text size="2" weight="bold" style={{ width: 100 }}>Aggregator</Text>
-                            <TextField.Root
-                                name="aggregator"
-                                defaultValue={setting.aggregator}
-                                placeholder="Enter aggregator URL"
-                                style={{ width: 600 }}
-                            />
-                        </Flex>
-
-                        <Flex align="center" gap="3">
-                            <Text size="2" weight="bold" style={{ width: 100 }}>Publisher</Text>
-                            <TextField.Root
-                                name="publisher"
-                                defaultValue={setting.publisher}
-                                placeholder="Enter publisher URL"
-                                style={{ width: 600 }}
-                            />
-                        </Flex>
-
-                        <Button type="submit">Save Settings</Button>
+                        <Button
+                            style={{
+                                background: "#2e7d32", // Deep green
+                                color: "white",
+                                fontWeight: "bold",
+                                padding: "12px",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                transition: "0.3s",
+                                boxShadow: "0px 3px 6px rgba(0, 128, 0, 0.2)",
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = "#1b5e20"}
+                            onMouseOut={(e) => e.currentTarget.style.background = "#2e7d32"}
+                        >
+                            Save Settings
+                        </Button>
                     </Flex>
+                </Form>
+
+                {/* Public Testing Info */}
+                <Card style={{ marginTop: "20px", padding: "12px", background: "#f1f8e9", borderRadius: "8px" }}>
+                    <Blockquote size="2">
+                        <Flex direction="column" gap="3">
+                            <Text>
+                                The Walrus system provides an interface that can be used for public testing. For your
+                                convenience, Walrus provides these at the following hosts:
+                            </Text>
+                            <Text>
+                                <Text weight="bold" color="green">Aggregator:</Text> https://aggregator.walrus-testnet.walrus.space
+                            </Text>
+                            <Text>
+                                <Text weight="bold" color="green">Publisher:</Text> https://publisher.walrus-testnet.walrus.space
+                            </Text>
+                        </Flex>
+                    </Blockquote>
                 </Card>
-            </Form>
 
-            <Card>
-                <Blockquote size="2">
-                    <Flex direction="column" gap="3">
-                        <Text>
-                            The Walrus system provides an interface that can be used for public testing. For your
-                            convenience, Walrus provides these at the following hosts:
-                        </Text>
-                        <Text>
-                            <Text weight="bold">Aggregator:</Text> https://aggregator-devnet.walrus.space
-                        </Text>
-                        <Text>
-                            <Text weight="bold">Publisher:</Text> https://publisher-devnet.walrus.space
-                        </Text>
-                    </Flex>
-                </Blockquote>
+                {/* Success Popup Dialog */}
+                <Dialog.Root open={showDialog} onOpenChange={setShowDialog}>
+                    <Dialog.Content style={{ maxWidth: 400, borderRadius: "12px", padding: "20px" }}>
+                        <Dialog.Title>✅ Success</Dialog.Title>
+                        <Dialog.Description>Your settings have been saved successfully.</Dialog.Description>
+                        <Flex justify="end">
+                            <Button onClick={() => setShowDialog(false)} style={{ background: "#2e7d32", color: "white" }}>OK</Button>
+                        </Flex>
+                    </Dialog.Content>
+                </Dialog.Root>
             </Card>
-
-            {/* Success Popup Dialog */}
-            <Dialog.Root open={showDialog} onOpenChange={setShowDialog}>
-                <Dialog.Content style={{ maxWidth: 400 }}>
-                    <Dialog.Title>Success</Dialog.Title>
-                    <Dialog.Description>Your settings have been saved successfully.</Dialog.Description>
-                    <Flex justify="end">
-                        <Button onClick={() => setShowDialog(false)}>OK</Button>
-                    </Flex>
-                </Dialog.Content>
-            </Dialog.Root>
         </Flex>
     );
 }
