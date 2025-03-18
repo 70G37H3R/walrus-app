@@ -26,5 +26,5 @@ RUN mkdir -p /root/walrus /root/.walrus /root/.sui/sui_config
 EXPOSE 9696
 
 # Copy and set permissions for the entrypoint script
-COPY walrus-app/deployment/walrus/* /root/.walrus/
-COPY walrus-app/deployment/sui/* /root/.sui/sui_config/
+COPY walrus/* /root/.walrus/
+COPY sui/* /root/.sui/sui_config/
