@@ -30,4 +30,4 @@ COPY walrus/* /root/.walrus/
 COPY sui/* /root/.sui/sui_config/
 
 # Start Walrus Publisher as the main process
-ENTRYPOINT ["walrus", "publisher", "--sub-wallets-dir", "/root/walrus", "--config", "/root/.walrus/config.yaml", "--bind-address", "0.0.0.0:9678", "--n-clients", "1"]
+ENTRYPOINT ["walrus", "publisher", "--sub-wallets-dir", "/root/walrus", "--config", "/root/.walrus/config.yaml", "--bind-address", "0.0.0.0:9678", "--max-body-size", "10485760000", "--n-clients", "1"]
